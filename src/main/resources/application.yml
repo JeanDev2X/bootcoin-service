@@ -1,0 +1,5 @@
+spring:
+   application:
+    name: bootcoin-service
+   config:
+     import: optional:configserver:http://localhost:8888
