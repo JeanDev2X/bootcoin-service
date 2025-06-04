@@ -1,5 +1,6 @@
 package com.bootcoin.service;
 
+import com.bootcoin.dto.ConfirmTransactionRequest;
 import com.bootcoin.model.BootCoinTransaction;
 import com.bootcoin.model.BootCoinWallet;
 import com.bootcoin.model.ExchangeRate;
@@ -17,5 +18,5 @@ public interface BootCoinService {
     Mono<BootCoinTransaction> requestTransaction(BootCoinTransaction transaction);
     Flux<BootCoinTransaction> getPendingTransactions();
 
-    Mono<BootCoinTransaction> confirmTransaction(String transactionId, String sellerPhoneNumber);
+    Mono<BootCoinTransaction> confirmTransaction(ConfirmTransactionRequest request);
 }

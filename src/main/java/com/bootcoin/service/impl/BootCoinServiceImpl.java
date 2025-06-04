@@ -2,18 +2,14 @@ package com.bootcoin.service.impl;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.cache.CacheProperties.Redis;
-import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.bootcoin.config.RedisConfig;
-import com.bootcoin.event.listener.BootCoinTransactionEventListener;
-import com.bootcoin.event.publisher.BootCoinTransactionEventPublisher;
+import com.bootcoin.dto.ConfirmTransactionRequest;
+import com.bootcoin.event.publisher.PaymentValidationPublisher;
 import com.bootcoin.model.BootCoinTransaction;
 import com.bootcoin.model.BootCoinWallet;
 import com.bootcoin.model.ExchangeRate;
@@ -22,6 +18,7 @@ import com.bootcoin.repository.BootCoinTransactionRepository;
 import com.bootcoin.repository.BootCoinWalletRepository;
 import com.bootcoin.repository.ExchangeRateRepository;
 import com.bootcoin.service.BootCoinService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -35,7 +32,8 @@ public class BootCoinServiceImpl implements BootCoinService{
 	private final ExchangeRateRepository exchangeRateRepository;
     private final BootCoinWalletRepository bootCoinWalletRepository;
     private final BootCoinTransactionRepository bootCoinTransactionRepository;
-    private final BootCoinTransactionEventPublisher eventPublisher;
+//    private final BootCoinTransactionEventPublisher eventPublisher;
+    private final PaymentValidationPublisher paymentValidationPublisher;
     
     @Autowired
     private final ReactiveRedisTemplate<String, Object> redisTemplate;
@@ -118,10 +116,12 @@ public class BootCoinServiceImpl implements BootCoinService{
 	            transaction.setTransactionRef(UUID.randomUUID().toString());
 	            transaction.setCreatedAt(LocalDate.now());
 
+	            log.info("transaction {}", transaction);
+
 	            return bootCoinTransactionRepository.save(transaction)
 	                .doOnSuccess(savedTx -> {
 	                    log.info("Transacción guardada con tipo de cambio: {}", rateToUse);
-	                    eventPublisher.publishTransactionRequested(savedTx);
+	                    // No se publica ningún evento aquí
 	                });
 	        });
 	}
@@ -132,24 +132,28 @@ public class BootCoinServiceImpl implements BootCoinService{
 	}
 
 	@Override
-	public Mono<BootCoinTransaction> confirmTransaction(String transactionRef, String phoneNumber) {
-		return bootCoinTransactionRepository.findByTransactionRef(transactionRef)
-		        .flatMap(tx -> {
-		            tx.setStatus("CONFIRMED");
+	public Mono<BootCoinTransaction> confirmTransaction(ConfirmTransactionRequest request) {
+	    return bootCoinTransactionRepository.findByTransactionRef(request.getTransactionRef())
+	        .flatMap(tx -> {
 
-		            if ("BUY".equalsIgnoreCase(tx.getTransactionType())) {
-		                // El vendedor acepta la compra → actualizamos seller
-		                tx.setSellerPhoneNumber(phoneNumber);
-		            } else if ("SELL".equalsIgnoreCase(tx.getTransactionType())) {
-		                // El comprador acepta la venta → actualizamos buyer
-		                tx.setBuyerPhoneNumber(phoneNumber);
-		            } else {
-		                return Mono.error(new IllegalStateException("Tipo de transacción inválido: " + tx.getTransactionType()));
-		            }
+	            if (!"PENDING".equalsIgnoreCase(tx.getStatus())) {
+	                return Mono.error(new IllegalStateException("Solo se pueden confirmar transacciones PENDING"));
+	            }
 
-		            return bootCoinTransactionRepository.save(tx)
-		                .doOnSuccess(eventPublisher::publishTransactionConfirmed);
-		        });
+	            tx.setStatus("CONFIRMING");
+
+	            //Seteamos el identificador del actor según el tipo de transacción
+	            if ("BUY".equalsIgnoreCase(tx.getTransactionType())) {
+	                tx.setSellerPhoneNumber(request.getActorIdentifier()); //actor que confirma venta
+	            } else {
+	                tx.setBuyerPhoneNumber(request.getActorIdentifier()); //actor que confirma compra
+	            }
+
+	            return bootCoinTransactionRepository.save(tx)
+	                .doOnSuccess(savedTx -> {
+	                    paymentValidationPublisher.publishValidationRequest(savedTx, request);
+	                });
+	        });
 	}
 
 }

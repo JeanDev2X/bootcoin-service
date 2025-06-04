@@ -10,9 +10,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "bootcoin_transactions")
@@ -21,6 +23,8 @@ public class BootCoinTransaction {
     private String id;
     private String buyerPhoneNumber;
     private String sellerPhoneNumber;
+    private String buyerAccountNumber;
+    private String sellerAccountNumber;
     private BigDecimal amountInSoles;// usado en transacciones BUY
     private BigDecimal amountInBootCoins;// usado en transacciones SELL
     private BigDecimal exchangeRateAtRequest; // Tasa de cambio aplicada al momento de crear la transacción
@@ -29,4 +33,5 @@ public class BootCoinTransaction {
     private LocalDate createdAt;
     private String transactionRef;
     private String transactionType; // valores posibles: "BUY" o "SELL"
+    
 }

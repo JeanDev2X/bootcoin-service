@@ -18,7 +18,6 @@ public class BootCoinTransactionEventDTO {
 	private String transactionRef;
     private String buyerPhoneNumber;//Número de teléfono del comprador
     private String sellerPhoneNumber;//Número de teléfono del vendedor
-    private BigDecimal amountInSoles; // Monto en soles que el comprador paga
     private BigDecimal amountInBootCoins;
     private BigDecimal exchangeRateAtRequest;
     private String paymentMode;       // YANKI o TRANSFER

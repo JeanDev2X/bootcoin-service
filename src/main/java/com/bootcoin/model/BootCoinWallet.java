@@ -24,7 +24,6 @@ public class BootCoinWallet {
     private String email;
     
     private BigDecimal bootCoinBalance = BigDecimal.ZERO; // Saldo en BootCoins
-    private BigDecimal solesBalance = BigDecimal.ZERO; // saldo en moneda nacional
     
     private String linkedYankiPhoneNumber; // Para pagos con YANKI
     private String linkedAccountNumber;    // Para pagos por transferencia

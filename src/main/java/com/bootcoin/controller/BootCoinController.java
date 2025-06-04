@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bootcoin.dto.ConfirmTransactionRequest;
 import com.bootcoin.model.BootCoinTransaction;
 import com.bootcoin.model.BootCoinWallet;
 import com.bootcoin.model.ExchangeRate;
 import com.bootcoin.service.BootCoinService;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -59,23 +59,23 @@ public class BootCoinController {
      * El body debe incluir el campo transactionType con valor "BUY" o "SELL".
      */
 	 @PostMapping("/requestTransaction")
-	    public Mono<ResponseEntity<BootCoinTransaction>> requestTransaction(
-	            @RequestBody BootCoinTransaction transactionRequest) {
-		 if ("BUY".equalsIgnoreCase(transactionRequest.getTransactionType())) {
-		        log.info("Recibiendo solicitud de COMPRA BootCoin: soles={}, phone={}",
-		                 transactionRequest.getAmountInSoles(), transactionRequest.getBuyerPhoneNumber());
-		    } else if ("SELL".equalsIgnoreCase(transactionRequest.getTransactionType())) {
-		        log.info("Recibiendo solicitud de VENTA BootCoin: bootcoins={}, phone={}",
-		                 transactionRequest.getAmountInBootCoins(), transactionRequest.getSellerPhoneNumber());
-		    }
-
-		    return bootCoinService.requestTransaction(transactionRequest)
-		            .map(savedTx -> {
-		                log.info("Transacción solicitada registrada: id={}, tipo={}",
-		                         savedTx.getId(), savedTx.getTransactionType());
-		                return ResponseEntity.ok(savedTx);
-		            });
+    public Mono<ResponseEntity<BootCoinTransaction>> requestTransaction(
+            @RequestBody BootCoinTransaction transactionRequest) {
+	 if ("BUY".equalsIgnoreCase(transactionRequest.getTransactionType())) {
+	        log.info("Recibiendo solicitud de COMPRA BootCoin: soles={}, phone={}",
+	                 transactionRequest.getAmountInSoles(), transactionRequest.getBuyerPhoneNumber());
+	    } else if ("SELL".equalsIgnoreCase(transactionRequest.getTransactionType())) {
+	        log.info("Recibiendo solicitud de VENTA BootCoin: bootcoins={}, phone={}",
+	                 transactionRequest.getAmountInBootCoins(), transactionRequest.getSellerPhoneNumber());
 	    }
+
+	    return bootCoinService.requestTransaction(transactionRequest)
+	            .map(savedTx -> {
+	                log.info("Transacción solicitada registrada: id={}, tipo={}",
+	                         savedTx.getId(), savedTx.getTransactionType());
+	                return ResponseEntity.ok(savedTx);
+	            });
+    }
 	
 	@GetMapping("/transactions/pending")
     public Flux<BootCoinTransaction> getPendingTransactions() {
@@ -83,8 +83,8 @@ public class BootCoinController {
     }
 	
 	@PatchMapping("/transactions/confirm")//Aceptar transaccion
-    public Mono<BootCoinTransaction> confirmTransaction(@RequestParam String transactionRef, @RequestParam String actorPhoneNumber) {
-		return bootCoinService.confirmTransaction(transactionRef, actorPhoneNumber);
+	public Mono<BootCoinTransaction> confirmTransaction(@RequestBody ConfirmTransactionRequest request) {
+		return bootCoinService.confirmTransaction(request);
     }
 	
 }
