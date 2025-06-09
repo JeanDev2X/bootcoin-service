@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.bootcoin.dto.ConfirmTransactionRequest;
+import com.bootcoin.op.dto.ConfirmTransactionRequest;
 import com.bootcoin.event.publisher.PaymentValidationPublisher;
 import com.bootcoin.model.BootCoinTransaction;
 import com.bootcoin.model.BootCoinWallet;

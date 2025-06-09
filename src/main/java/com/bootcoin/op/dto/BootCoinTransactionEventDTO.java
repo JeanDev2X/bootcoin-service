@@ -1,4 +1,4 @@
-package com.bootcoin.dto;
+package com.bootcoin.op.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

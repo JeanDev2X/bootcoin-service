@@ -1,6 +1,6 @@
 package com.bootcoin.service;
 
-import com.bootcoin.dto.ConfirmTransactionRequest;
+import com.bootcoin.op.dto.ConfirmTransactionRequest;
 import com.bootcoin.model.BootCoinTransaction;
 import com.bootcoin.model.BootCoinWallet;
 import com.bootcoin.model.ExchangeRate;

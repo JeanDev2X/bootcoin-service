@@ -8,6 +8,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import com.bootcoin.dto.PaymentValidationResponseDTO;
+import com.bootcoin.event.publisher.PaymentExecutionPublisher;
 import com.bootcoin.model.BootCoinWallet;
 import com.bootcoin.model.ExchangeRate;
 import com.bootcoin.repository.BootCoinTransactionRepository;
@@ -26,6 +27,9 @@ public class BootCoinTransactionValidationListener {
 	private final BootCoinWalletRepository walletRepository;
 	private final BootCoinTransactionRepository transactionRepository;
 	private final ExchangeRateRepository exchangeRateRepository;
+	
+	private final PaymentExecutionPublisher paymentExecutionPublisher;
+
 
 	@KafkaListener(
 		topics = "payment-validation-response",
@@ -82,7 +86,8 @@ public class BootCoinTransactionValidationListener {
 
 	            tx.setStatus("COMPLETED");
 	            return walletRepository.saveAll(List.of(seller, buyer))
-	                .then(transactionRepository.save(tx));
+	                .then(transactionRepository.save(tx))
+	                .doOnSuccess(savedTx -> paymentExecutionPublisher.publishExecutionRequest(savedTx));//agregar al topico
 	        });
 	    })
 	    .doOnSuccess(tx -> log.info("Transacción COMPLETADA: {}", tx.getTransactionRef()))

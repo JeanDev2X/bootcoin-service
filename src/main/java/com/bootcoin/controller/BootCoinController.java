@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bootcoin.dto.ConfirmTransactionRequest;
+import com.bootcoin.op.dto.ConfirmTransactionRequest;
 import com.bootcoin.model.BootCoinTransaction;
 import com.bootcoin.model.BootCoinWallet;
 import com.bootcoin.model.ExchangeRate;

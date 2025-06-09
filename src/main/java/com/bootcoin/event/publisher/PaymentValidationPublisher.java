@@ -2,7 +2,7 @@ package com.bootcoin.event.publisher;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
-import com.bootcoin.dto.ConfirmTransactionRequest;
+import com.bootcoin.op.dto.ConfirmTransactionRequest;
 import com.bootcoin.dto.PaymentValidationRequestDTO;
 import com.bootcoin.model.BootCoinTransaction;
 import lombok.RequiredArgsConstructor;
